@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PulseAI — Daily Tech, National & Tamil Nadu Intelligence</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            slate: {
+              850: '#131c2e',
+              950: '#090d16'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+  <!-- Top Navigation & Command Bar -->
+  <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-blue-600 to-emerald-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i data-lucide="radar" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold tracking-tight text-white">PulseAI</h1>
+            <span class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">Intelligence Briefing</span>
+          </div>
+          <p class="text-xs text-slate-400">Priority 1: Tech &amp; AI • Priority 2: Infra, Economy &amp; Policy</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search stories, chips, Chennai..."
+            class="bg-slate-900 border border-slate-800 text-slate-200 text-xs sm:text-sm rounded-lg pl-9 pr-3 py-2 w-44 sm:w-60 focus:outline-none focus:border-indigo-500 transition"
+          />
+        </div>
+
+        <button
+          id="syncLiveBtn"
+          type="button"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-600/30 transition"
+          title="Fetch latest tech and regional items from trusted feeds"
+        >
+          <i data-lucide="refresh-cw" id="syncIcon" class="w-4 h-4"></i>
+          <span id="syncBtnLabel">Sync Live Feeds</span>
+        </button>
+
+        <button
+          id="openAnalyzeBtn"
+          type="button"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition"
+          title="Summarize any custom article or headline into What / Why / Takeaway"
+        >
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+          <span class="hidden md:inline">AI Summarize</span>
+        </button>
+
+        <button
+          id="openSourcesBtn"
+          type="button"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition"
+          title="Configure Trusted Sources & Optional Gemini API Key"
+        >
+          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-emerald-400"></i>
+          <span class="hidden lg:inline">Sources &amp; AI Config</span>
+        </button>
+
+        <button
+          id="exportDigestBtn"
+          type="button"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition"
+          title="Export or copy today's briefing"
+        >
+          <i data-lucide="share-2" class="w-4 h-4 text-sky-400"></i>
+          <span class="hidden xl:inline">Export Briefing</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 border-t border-slate-900 flex flex-wrap items-center justify-between gap-3 bg-slate-950/60">
+      <div class="flex items-center gap-1.5 overflow-x-auto py-0.5" id="regionTabs">
+        <button data-region="all" class="region-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white flex items-center gap-1.5">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span>All Tiers</span>
+          <span id="count-all" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">0</span>
+        </button>
+        <button data-region="global" class="region-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-900 text-slate-300 hover:bg-slate-800 flex items-center gap-1.5">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>Global</span>
+          <span id="count-global" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800">0</span>
+        </button>
+        <button data-region="india" class="region-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-900 text-slate-300 hover:bg-slate-800 flex items-center gap-1.5">
+          <i data-lucide="landmark" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>India (National)</span>
+          <span id="count-india" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800">0</span>
+        </button>
+        <button data-region="tn" class="region-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-900 text-slate-300 hover:bg-slate-800 flex items-center gap-1.5">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Tamil Nadu</span>
+          <span id="count-tn" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800">0</span>
+        </button>
+        <button data-region="saved" class="region-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-900 text-slate-300 hover:bg-slate-800 flex items-center gap-1.5">
+          <i data-lucide="bookmark" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>Saved</span>
+          <span id="count-saved" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800">0</span>
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-800" id="priorityTabs">
+          <button data-priority="all" class="priority-tab px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-white transition">All Priorities</button>
+          <button data-priority="p1" class="priority-tab px-2.5 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white transition flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-indigo-400"></span> P1: Tech &amp; AI
+          </button>
+          <button data-priority="p2" class="priority-tab px-2.5 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white transition flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span> P2: Infra, Econ &amp; Policy
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1">
+          <label for="scoreFilter" class="text-[11px] text-slate-400 font-medium">Min Impact:</label>
+          <select id="scoreFilter" class="bg-transparent text-xs font-semibold text-indigo-300 focus:outline-none cursor-pointer">
+            <option value="0" class="bg-slate-900 text-slate-200">All (7.0+)</option>
+            <option value="8.5" class="bg-slate-900 text-slate-200">High Signal (8.5+)</option>
+            <option value="9.0" class="bg-slate-900 text-slate-200">Critical Only (9.0+)</option>
+          </select>
+        </div>
+
+        <button
+          id="toggleLayoutBtn"
+          type="button"
+          class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition inline-flex items-center gap-1"
+          title="Switch between Unified Grid and 3-Column Regional Split"
+        >
+          <i data-lucide="columns-3" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span id="layoutModeLabel">3-Column Split</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div class="bg-slate-900/90 border border-slate-800/90 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400">Priority 1 (Tech &amp; AI)</p>
+          <p id="statP1Count" class="text-2xl font-bold text-indigo-400 mt-0.5">0</p>
+          <p class="text-[11px] text-slate-500 mt-0.5">Primary focus stories</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+          <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800/90 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400">Priority 2 (Infra / Econ / Policy)</p>
+          <p id="statP2Count" class="text-2xl font-bold text-amber-400 mt-0.5">0</p>
+          <p class="text-[11px] text-slate-500 mt-0.5">Macro &amp; civic updates</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+          <i data-lucide="building-2" class="w-5 h-5 text-amber-400"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800/90 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400">Tamil Nadu &amp; Chennai</p>
+          <p id="statTNCount" class="text-2xl font-bold text-emerald-400 mt-0.5">0</p>
+          <p class="text-[11px] text-slate-500 mt-0.5">State tech, EV, Metro &amp; policy</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+          <i data-lucide="compass" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800/90 rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-400">Trusted Feed Status</p>
+          <div class="flex items-center gap-1.5 mt-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-subtle"></span>
+            <p id="statSyncStatus" class="text-sm font-semibold text-slate-200">Verified Oct 2026</p>
+          </div>
+          <p id="statSourceCount" class="text-[11px] text-slate-500 mt-1">10 whitelisted sources active</p>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
+          <i data-lucide="shield-check" class="w-5 h-5 text-sky-400"></i>
+        </div>
+      </div>
+    </section>
+
+    <section id="newsContainer"></section>
+  </main>
+
+  <div id="toastBox" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2.5 bg-slate-900 border border-indigo-500/40 text-slate-100 px-4 py-3 rounded-xl shadow-2xl text-xs sm:text-sm">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+    <span id="toastText">Updated</span>
+  </div>
+
+  <!-- Modal 1: AI Summarize Custom Article / Headline -->
+  <div id="analyzeModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+          <h2 class="text-base font-bold text-white">AI Story Analyzer (What • Why • Takeaway)</h2>
+        </div>
+        <button type="button" id="closeAnalyzeBtn" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400">
+        Paste any raw news headline, paragraph, or press release below. The analyzer will classify its Region Tier and Priority (P1 Tech/AI vs P2 Infra/Economy/Policy), score its importance, and generate a structured card for your dashboard.
+      </p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Headline / Topic Title</label>
+          <input id="customTitle" type="text" placeholder="e.g., IIT Madras & Guidance TN launch new AI robotics cluster in Chennai" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Region Tier</label>
+            <select id="customRegion" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="auto">Auto-Detect</option>
+              <option value="tn">Tamil Nadu</option>
+              <option value="india">India (National)</option>
+              <option value="global">Global</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Source Name</label>
+            <input id="customSource" type="text" placeholder="e.g., The Hindu" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Source URL</label>
+            <input id="customUrl" type="url" placeholder="https://www.thehindu.com/..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Raw Article Text or Notes</label>
+          <textarea id="customBody" rows="4" placeholder="Paste article snippet or key facts here..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+        <button type="button" id="fillSampleBtn" class="px-3 py-2 rounded-lg text-xs font-medium text-indigo-300 hover:bg-indigo-500/10 transition">
+          Load Sample TN Tech News
+        </button>
+        <button type="button" id="runAnalyzeBtn" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5">
+          <i data-lucide="wand-2" class="w-4 h-4"></i>
+          <span>Generate Card &amp; Add to Feed</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Trusted Sources & Optional Gemini API Key Config -->
+  <div id="sourcesModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i>
+          <h2 class="text-base font-bold text-white">Trusted Sources Registry &amp; AI Engine</h2>
+        </div>
+        <button type="button" id="closeSourcesBtn" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="geminiKeyInput" class="text-xs font-semibold text-indigo-300 flex items-center gap-1.5">
+            <i data-lucide="key-round" class="w-4 h-4"></i>
+            Optional Gemini API Key (for Live LLM Summarization)
+          </label>
+          <span class="text-[11px] text-slate-400">Stored locally in your browser</span>
+        </div>
+        <p class="text-xs text-slate-400">
+          PulseAI works out of the box using its built-in rule-based scoring and summarization engine. If you add a Gemini API key, live feed syncs and custom story analyses will use <code class="text-indigo-300">gemini-2.5-flash</code> to write the What / Why / Takeaway bullets.
+        </p>
+        <div class="flex gap-2 pt-1">
+          <input id="geminiKeyInput" type="password" placeholder="AIzaSy... (optional)" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
+          <button type="button" id="saveApiKeyBtn" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">Save Key</button>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Whitelisted Trusted Sources</h3>
+        <div id="trustedSourcesList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Export Briefing -->
+  <div id="exportModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-text" class="w-5 h-5 text-sky-400"></i>
+          <h2 class="text-base font-bold text-white">Export Today's Executive Briefing</h2>
+        </div>
+        <button type="button" id="closeExportBtn" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-400">Copy or download the currently filtered stories in plain English (What / Why / Takeaway).</p>
+      <textarea id="exportTextarea" rows="10" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none custom-scrollbar"></textarea>
+      <div class="flex items-center justify-end gap-2">
+        <button type="button" id="copyBriefingBtn" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition inline-flex items-center gap-1.5">
+          <i data-lucide="copy" class="w-4 h-4"></i>
+          <span>Copy to Clipboard</span>
+        </button>
+        <button type="button" id="downloadBriefingBtn" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold transition inline-flex items-center gap-1.5">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Download .md</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
